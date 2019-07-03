@@ -1,0 +1,19 @@
+{
+  "name": "@endereco/postcodeautocomplete",
+  "version": "1.0.0",
+  "description": "",
+  "main": "PostCodeAutocomplete.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Endereco/PostCodeAutocomplete.git"
+  },
+  "author": "Ilja Weber <ilja@endereco.de>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Endereco/PostCodeAutocomplete/issues"
+  },
+  "homepage": "https://github.com/Endereco/PostCodeAutocomplete#readme"
+}
