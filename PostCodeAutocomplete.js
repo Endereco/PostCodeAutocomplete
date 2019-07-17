@@ -318,6 +318,14 @@ function PostCodeAutocomplete(config) {
             });
         });
 
+        $self.inputElement.addEventListener('focus', function() {
+            var acCall = $self.getPredictions();
+            acCall.then( function($data) {
+                $self.predictions = $data.result.predictions;
+                $self.validate();
+            });
+        });
+
         // Register blur event
         $self.inputElement.addEventListener('blur', function() {
             $self.removeDropdown();
