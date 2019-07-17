@@ -27,6 +27,19 @@ function PostCodeAutocomplete(config) {
     this.config = Object.assign(this.defaultConfig, config);
     this.connector = new XMLHttpRequest();
 
+    // Includes polyfill for IE
+    if (!Array.prototype.includes) {
+        Object.defineProperty(Array.prototype, "includes", {
+            enumerable: false,
+            value: function(obj) {
+                var newArr = this.filter(function(el) {
+                    return el == obj;
+                });
+                return newArr.length > 0;
+            }
+        });
+    }
+
     this.createEvent = function(eventName) {
         var event;
         if(typeof(Event) === 'function') {
@@ -125,7 +138,7 @@ function PostCodeAutocomplete(config) {
      * Renders predictions in a dropdown.
      */
     this.renderDropdown = function() {
-        var ul
+        var ul;
         var li;
         var postCode;
         var input;
@@ -160,7 +173,7 @@ function PostCodeAutocomplete(config) {
         ul.style.position = 'absolute';
         ul.style.top = 4 + $self.inputElement.offsetTop + $self.inputElement.offsetHeight + 'px';
         ul.style.left = $self.inputElement.offsetLeft + 'px';
-        ul.setAttribute('class', 'endereco-dropdown')
+        ul.setAttribute('class', 'endereco-dropdown');
         $self.dropdown = ul;
         $self.inputElement.parentNode.insertBefore(ul, $self.inputElement.nextSibling);
 
@@ -243,6 +256,29 @@ function PostCodeAutocomplete(config) {
     }
 
     /**
+     * Validate fields.
+     */
+    this.validate = function() {
+        var input = $self.inputElement.value.trim();
+        var event;
+        var includes = false;
+
+        $self.predictions.forEach( function(prediction) {
+            if (input === prediction.postCode) {
+                includes = true;
+            }
+        });
+
+        if (includes) {
+            event = $self.createEvent('endereco.valid');
+            $self.inputElement.dispatchEvent(event);
+        } else {
+            event = $self.createEvent('endereco.check');
+            $self.inputElement.dispatchEvent(event);
+        }
+    };
+
+    /**
      * Init postCodeAutocomplete.
      */
     this.init = function() {
@@ -271,16 +307,21 @@ function PostCodeAutocomplete(config) {
 
         // Register events
         $self.inputElement.addEventListener('input', function() {
+            var $this = this;
             var acCall = $self.getPredictions();
             acCall.then( function($data) {
                $self.predictions = $data.result.predictions;
-               $self.renderDropdown();
+               if ($this === document.activeElement) {
+                   $self.renderDropdown();
+               }
+               $self.validate();
             });
         });
 
         // Register blur event
         $self.inputElement.addEventListener('blur', function() {
             $self.removeDropdown();
+            $self.validate();
         });
 
         // Register mouse navigation
