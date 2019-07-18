@@ -419,7 +419,7 @@ function PostCodeAutocomplete(config) {
 
         $self.dirty = false;
 
-        console.log('PostcodeAutocomplete instantiated.');
+        console.log('PostcodeAutocomplete initiated.');
     }
 
     // Check if the browser is chrome
