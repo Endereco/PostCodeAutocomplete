@@ -35,6 +35,7 @@ function PostCodeAutocomplete(config) {
     this.fieldsAreSet = false;
     this.dirty = false;
     this.originalInput;
+    this.originalCity;
     this.blockInput = false;
     this.config = $self.mergeObjects([this.defaultConfig, config]);
     this.connector = new XMLHttpRequest();
@@ -95,6 +96,7 @@ function PostCodeAutocomplete(config) {
     this.getPredictions = function() {
         $self.activeElementIndex = -1;
         $self.originalInput = '';
+        $self.originalCity = '';
         return new Promise( function(resolve, reject) {
             var countryCode = 'de';
             var countryElement;
@@ -189,6 +191,13 @@ function PostCodeAutocomplete(config) {
         $self.dropdown = ul;
         $self.inputElement.parentNode.insertBefore(ul, $self.inputElement.nextSibling);
 
+        ul.addEventListener('mouseout', function() {
+            $self.inputElement.value = $self.originalInput;
+            if (document.querySelector($self.config.secondaryInputSelectors.cityName)) {
+                document.querySelector($self.config.secondaryInputSelectors.cityName).value = $self.originalCity;
+            }
+        });
+
         // Iterate through list and create new elements
         $self.predictions.forEach( function(element) {
             li = document.createElement('li');
@@ -225,16 +234,18 @@ function PostCodeAutocomplete(config) {
             // Register event
             li.addEventListener('mouseover', function(mEvent) {
                 mEvent.preventDefault();
+
                 selectedPostCode = this.getAttribute('data-post-code');
                 $self.inputElement.value = selectedPostCode;
                 $self.activeElementIndex = this.getAttribute('data-index') * 1;
 
                 if ($self.config.secondaryInputSelectors && $self.config.secondaryInputSelectors.cityName) {
+
                     selectedCityName = this.getAttribute('data-city-name');
                     cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
+
                     if (selectedCityName && cityNameField) {
                         cityNameField.value = selectedCityName.trim();
-
                     }
                 }
             });
@@ -245,9 +256,13 @@ function PostCodeAutocomplete(config) {
                 event = $self.createEvent('endereco.valid');
                 $self.inputElement.dispatchEvent(event);
 
+                $self.originalInput = $self.inputElement.value;
+
                 if ($self.config.secondaryInputSelectors && $self.config.secondaryInputSelectors.cityName) {
                     event = $self.createEvent('endereco.valid');
                     cityNameField.dispatchEvent(event);
+
+                    self.originalCity = document.querySelector($self.config.secondaryInputSelectors.cityName).value;
                 }
 
                 $self.removeDropdown();
@@ -352,17 +367,28 @@ function PostCodeAutocomplete(config) {
             var selectedCityName, cityNameField, event;
             if ('ArrowUp' === mEvent.code || 'Up' === mEvent.key) {
                 mEvent.preventDefault();
-                if (0 < $self.activeElementIndex) {
-                    $self.activeElementIndex--;
+
+
+                if (0 === $self.activeElementIndex) {
+                    $self.activeElementIndex = -1;
+                    $self.inputElement.value = $self.originalInput;
+                    if (document.querySelector($self.config.secondaryInputSelectors.cityName)) {
+                        document.querySelector($self.config.secondaryInputSelectors.cityName).value = $self.originalCity;
+                    }
                 }
 
-                // Prefill selection to input
-                $self.inputElement.value = $self.predictions[$self.activeElementIndex].postCode;
-                selectedCityName = $self.predictions[$self.activeElementIndex].cityName;
-                cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
-                if (selectedCityName && cityNameField) {
-                    cityNameField.value = selectedCityName.trim();
+                if (0 < $self.activeElementIndex) {
+                    $self.activeElementIndex--;
+                    // Prefill selection to input
+                    $self.inputElement.value = $self.predictions[$self.activeElementIndex].postCode;
+                    selectedCityName = $self.predictions[$self.activeElementIndex].cityName;
+                    cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
+                    if (selectedCityName && cityNameField) {
+                        cityNameField.value = selectedCityName.trim();
+                    }
                 }
+
+
 
                 $self.renderDropdown();
             }
@@ -407,6 +433,9 @@ function PostCodeAutocomplete(config) {
                     event = $self.createEvent('endereco.valid');
                     cityNameField.dispatchEvent(event);
                 }
+
+                $self.originalInput = $self.inputElement.value;
+                $self.originalCity = cityNameField.value;
 
                 $self.removeDropdown();
             }
