@@ -95,8 +95,6 @@ function PostCodeAutocomplete(config) {
      */
     this.getPredictions = function() {
         $self.activeElementIndex = -1;
-        $self.originalInput = '';
-        $self.originalCity = '';
         return new Promise( function(resolve, reject) {
             var countryCode = 'de';
             var countryElement;
@@ -256,15 +254,12 @@ function PostCodeAutocomplete(config) {
                 event = $self.createEvent('endereco.valid');
                 $self.inputElement.dispatchEvent(event);
 
-                $self.originalInput = $self.inputElement.value;
-
                 if ($self.config.secondaryInputSelectors && $self.config.secondaryInputSelectors.cityName) {
                     event = $self.createEvent('endereco.valid');
                     cityNameField.dispatchEvent(event);
-
-                    self.originalCity = document.querySelector($self.config.secondaryInputSelectors.cityName).value;
                 }
 
+                $self.saveOriginal();
                 $self.removeDropdown();
             });
 
@@ -286,6 +281,28 @@ function PostCodeAutocomplete(config) {
     }
 
     /**
+     * Resotre original values.
+     */
+    this.restoreOriginal = function() {
+        cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
+        if (cityNameField) {
+            cityNameField.value = $self.originalCity
+        }
+        $self.inputElement.value = $self.originalInput;
+    }
+
+    /**
+     * Save original state.
+     */
+    this.saveOriginal = function() {
+        var cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
+        if (cityNameField) {
+            $self.originalCity = cityNameField.value;
+        }
+        $self.originalInput = $self.inputElement.value;
+    }
+
+    /**
      * Validate fields.
      */
     this.validate = function() {
@@ -299,12 +316,10 @@ function PostCodeAutocomplete(config) {
             }
         });
 
-        console.log("Test cache.");
-
         if (includes) {
             event = $self.createEvent('endereco.valid');
             $self.inputElement.dispatchEvent(event);
-        } else if('' === input.value) {
+        } else if('' === input) {
             event = $self.createEvent('endereco.clean');
             $self.inputElement.dispatchEvent(event);
         } else {
@@ -317,13 +332,14 @@ function PostCodeAutocomplete(config) {
      * Init postCodeAutocomplete.
      */
     this.init = function() {
-
         try {
             $self.inputElement = document.querySelector($self.config.inputSelector);
             $self.dropdown = undefined;
             $self.dropdownDraw = true;
             $self.predictions = [];
             $self.activeElementIndex = -1;
+
+            $self.saveOriginal();
         } catch(e) {
             console.log('Could not initiate PostCodeAutocomplete because of error.');
         }
@@ -344,26 +360,28 @@ function PostCodeAutocomplete(config) {
         $self.inputElement.addEventListener('input', function() {
             var $this = this;
             var acCall = $self.getPredictions();
+            $self.originalInput = this.value;
             acCall.then( function($data) {
                $self.predictions = $data.result.predictions;
                if ($this === document.activeElement) {
                    $self.renderDropdown();
                }
-               $self.validate();
-            });
+            }, function($data){console.log('Rejected with data:', $data)});
         });
 
         $self.inputElement.addEventListener('focus', function() {
             var acCall = $self.getPredictions();
+            $self.saveOriginal();
             acCall.then( function($data) {
                 $self.predictions = $data.result.predictions;
                 $self.validate();
-            });
+            }, function($data){console.log('Rejected with data:', $data)});
         });
 
         // Register blur event
         $self.inputElement.addEventListener('blur', function() {
             $self.removeDropdown();
+            $self.restoreOriginal();
             $self.validate();
         });
 
@@ -372,7 +390,6 @@ function PostCodeAutocomplete(config) {
             var selectedCityName, cityNameField, event;
             if ('ArrowUp' === mEvent.code || 'Up' === mEvent.key) {
                 mEvent.preventDefault();
-
 
                 if (0 === $self.activeElementIndex) {
                     $self.activeElementIndex = -1;
@@ -392,8 +409,6 @@ function PostCodeAutocomplete(config) {
                         cityNameField.value = selectedCityName.trim();
                     }
                 }
-
-
 
                 $self.renderDropdown();
             }
@@ -439,9 +454,7 @@ function PostCodeAutocomplete(config) {
                     cityNameField.dispatchEvent(event);
                 }
 
-                $self.originalInput = $self.inputElement.value;
-                $self.originalCity = cityNameField.value;
-
+                $self.saveOriginal();
                 $self.removeDropdown();
             }
 
