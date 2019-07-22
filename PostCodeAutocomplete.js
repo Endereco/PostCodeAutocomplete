@@ -299,11 +299,16 @@ function PostCodeAutocomplete(config) {
             }
         });
 
-        if (includes) {
-            event = $self.createEvent('endereco.valid');
+        console.log("Test cache.");
+
+        if (!includes) {
+            event = $self.createEvent('endereco.check');
+            $self.inputElement.dispatchEvent(event);
+        } else if('' === input.value) {
+            event = $self.createEvent('endereco.clean');
             $self.inputElement.dispatchEvent(event);
         } else {
-            event = $self.createEvent('endereco.check');
+            event = $self.createEvent('endereco.valid');
             $self.inputElement.dispatchEvent(event);
         }
     };
