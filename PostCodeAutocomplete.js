@@ -335,6 +335,7 @@ function PostCodeAutocomplete(config) {
      * Init postCodeAutocomplete.
      */
     this.init = function() {
+        var cityNameSet = false;
         try {
             $self.inputElement = document.querySelector($self.config.inputSelector);
             $self.dropdown = undefined;
@@ -390,7 +391,7 @@ function PostCodeAutocomplete(config) {
 
         // Register mouse navigation
         $self.inputElement.addEventListener('keydown', function(mEvent) {
-            var selectedCityName, cityNameField, cityNameSet = false, event;
+            var selectedCityName, cityNameField, event;
             if ('ArrowUp' === mEvent.key || 'Up' === mEvent.key) {
                 mEvent.preventDefault();
 
@@ -411,10 +412,14 @@ function PostCodeAutocomplete(config) {
                         cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
                         if (selectedCityName && cityNameField) {
                             cityNameField.value = selectedCityName.trim();
+                            cityNameSet = true;
+                        } else {
+                            cityNameSet = false;
                         }
                     }
                 }
 
+                console.log(cityNameSet);
                 $self.renderDropdown();
             }
 
@@ -431,10 +436,13 @@ function PostCodeAutocomplete(config) {
                     cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
                     if (selectedCityName && cityNameField) {
                         cityNameField.value = selectedCityName.trim();
+                        cityNameSet = true;
+                    } else {
+                        cityNameSet = false;
                     }
                 }
 
-
+                console.log(cityNameSet);
                 $self.renderDropdown();
             }
 
@@ -456,6 +464,8 @@ function PostCodeAutocomplete(config) {
                 // Then
                 event = $self.createEvent('endereco.valid');
                 $self.inputElement.dispatchEvent(event);
+
+                console.log(cityNameSet);
 
                 cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
                 if (cityNameField && cityNameSet) {
