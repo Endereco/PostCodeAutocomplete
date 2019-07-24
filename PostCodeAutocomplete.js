@@ -167,6 +167,7 @@ function PostCodeAutocomplete(config) {
         var selectedPostCode;
         var selectedCityName;
         var cityNameField;
+        var cityNameSet = false;
 
         $self.removeDropdown();
 
@@ -241,9 +242,11 @@ function PostCodeAutocomplete(config) {
 
                     selectedCityName = this.getAttribute('data-city-name');
                     cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
-
-                    if (selectedCityName && cityNameField) {
+                    if (cityNameField && selectedCityName) {
                         cityNameField.value = selectedCityName.trim();
+                        cityNameSet = true;
+                    } else {
+                        cityNameSet = false;
                     }
                 }
             });
@@ -254,7 +257,7 @@ function PostCodeAutocomplete(config) {
                 event = $self.createEvent('endereco.valid');
                 $self.inputElement.dispatchEvent(event);
 
-                if ($self.config.secondaryInputSelectors && $self.config.secondaryInputSelectors.cityName) {
+                if ($self.config.secondaryInputSelectors && $self.config.secondaryInputSelectors.cityName && cityNameSet) {
                     event = $self.createEvent('endereco.valid');
                     cityNameField.dispatchEvent(event);
                 }
@@ -387,7 +390,7 @@ function PostCodeAutocomplete(config) {
 
         // Register mouse navigation
         $self.inputElement.addEventListener('keydown', function(mEvent) {
-            var selectedCityName, cityNameField, event;
+            var selectedCityName, cityNameField, cityNameSet = false, event;
             if ('ArrowUp' === mEvent.key || 'Up' === mEvent.key) {
                 mEvent.preventDefault();
 
@@ -402,11 +405,13 @@ function PostCodeAutocomplete(config) {
                 if (0 < $self.activeElementIndex) {
                     $self.activeElementIndex--;
                     // Prefill selection to input
-                    $self.inputElement.value = $self.predictions[$self.activeElementIndex].postCode;
-                    selectedCityName = $self.predictions[$self.activeElementIndex].cityName;
-                    cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
-                    if (selectedCityName && cityNameField) {
-                        cityNameField.value = selectedCityName.trim();
+                    if (0 < $self.predictions.length) {
+                        $self.inputElement.value = $self.predictions[$self.activeElementIndex].postCode;
+                        selectedCityName = $self.predictions[$self.activeElementIndex].cityName;
+                        cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
+                        if (selectedCityName && cityNameField) {
+                            cityNameField.value = selectedCityName.trim();
+                        }
                     }
                 }
 
@@ -420,12 +425,15 @@ function PostCodeAutocomplete(config) {
                 }
 
                 // Prefill selection to input
-                $self.inputElement.value = $self.predictions[$self.activeElementIndex].postCode;
-                selectedCityName = $self.predictions[$self.activeElementIndex].cityName;
-                cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
-                if (selectedCityName && cityNameField) {
-                    cityNameField.value = selectedCityName.trim();
+                if (0 < $self.predictions.length) {
+                    $self.inputElement.value = $self.predictions[$self.activeElementIndex].postCode;
+                    selectedCityName = $self.predictions[$self.activeElementIndex].cityName;
+                    cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
+                    if (selectedCityName && cityNameField) {
+                        cityNameField.value = selectedCityName.trim();
+                    }
                 }
+
 
                 $self.renderDropdown();
             }
@@ -439,8 +447,9 @@ function PostCodeAutocomplete(config) {
                     $self.inputElement.value = $self.predictions[0].postCode;
                     selectedCityName = $self.predictions[0].cityName;
                     cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
-                    if (selectedCityName && cityNameField) {
+                    if (cityNameField && ('' !== selectedCityName)) {
                         cityNameField.value = selectedCityName.trim();
+                        cityNameSet = true;
                     }
                 }
 
@@ -449,7 +458,7 @@ function PostCodeAutocomplete(config) {
                 $self.inputElement.dispatchEvent(event);
 
                 cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
-                if (cityNameField) {
+                if (cityNameField && cityNameSet) {
                     event = $self.createEvent('endereco.valid');
                     cityNameField.dispatchEvent(event);
                 }
