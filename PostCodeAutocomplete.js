@@ -37,6 +37,7 @@ function PostCodeAutocomplete(config) {
     this.originalInput;
     this.originalCity;
     this.blockInput = false;
+    this.lastInputError = true;
     this.config = $self.mergeObjects([this.defaultConfig, config]);
     this.connector = new XMLHttpRequest();
 
@@ -100,15 +101,19 @@ function PostCodeAutocomplete(config) {
             var countryElement;
             // On data receive
             $self.connector.onreadystatechange = function() {
+                var $data = {};
                 if(4 === $self.connector.readyState) {
                     if ($self.connector.responseText && '' !== $self.connector.responseText) {
                         $data = JSON.parse($self.connector.responseText);
                         if ($data.result) {
+                            $self.lastInputError = false;
                             resolve($data);
                         } else {
+                            $self.lastInputError = true;
                             reject($data);
                         }
                     } else {
+                        $self.lastInputError = true;
                         reject($data);
                     }
                 }
@@ -313,6 +318,10 @@ function PostCodeAutocomplete(config) {
         var event;
         var includes = false;
 
+        if ($self.lastInputError) {
+            return;
+        }
+
         $self.predictions.forEach( function(prediction) {
             if (input === prediction.postCode) {
                 includes = true;
@@ -366,10 +375,10 @@ function PostCodeAutocomplete(config) {
             var acCall = $self.getPredictions();
             $self.originalInput = this.value;
             acCall.then( function($data) {
-               $self.predictions = $data.result.predictions;
-               if ($this === document.activeElement) {
-                   $self.renderDropdown();
-               }
+                $self.predictions = $data.result.predictions;
+                if ($this === document.activeElement) {
+                    $self.renderDropdown();
+                }
             }, function($data){console.log('Rejected with data:', $data)});
         });
 
