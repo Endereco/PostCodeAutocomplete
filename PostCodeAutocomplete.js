@@ -427,8 +427,6 @@ function PostCodeAutocomplete(config) {
                         }
                     }
                 }
-
-                console.log(cityNameSet);
                 $self.renderDropdown();
             }
 
@@ -451,7 +449,6 @@ function PostCodeAutocomplete(config) {
                     }
                 }
 
-                console.log(cityNameSet);
                 $self.renderDropdown();
             }
 
@@ -473,8 +470,6 @@ function PostCodeAutocomplete(config) {
                 // Then
                 event = $self.createEvent('endereco.valid');
                 $self.inputElement.dispatchEvent(event);
-
-                console.log(cityNameSet);
 
                 cityNameField = document.querySelector($self.config.secondaryInputSelectors.cityName);
                 if (cityNameField && cityNameSet) {
