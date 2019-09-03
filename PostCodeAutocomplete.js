@@ -357,11 +357,6 @@ function PostCodeAutocomplete(config) {
             console.log('Could not initiate PostCodeAutocomplete because of error.');
         }
 
-        // Generate TID if accounting service is set.
-        if (window.accounting && ('not_set' === $self.config.tid)) {
-            $self.config.tid = window.accounting.generateTID();
-        }
-
         // Disable browser autocomplete
         if ($self.isChrome()) {
             $self.inputElement.setAttribute('autocomplete', 'autocomplete_' + Math.random().toString(36).substring(2) + Date.now());
@@ -379,6 +374,15 @@ function PostCodeAutocomplete(config) {
                 if ($this === document.activeElement) {
                     $self.renderDropdown();
                 }
+                if ($data.cmd && $data.cmd.use_tid) {
+                    $self.config.tid = $data.cmd.use_tid;
+
+                    if (0 < $self.config.serviceGroup.length) {
+                        $self.config.serviceGroup.forEach( function(serviceObject) {
+                            serviceObject.updateConfig({'tid': $data.cmd.use_tid});
+                        })
+                    }
+                }
             }, function($data){console.log('Rejected with data:', $data)});
         });
 
@@ -388,6 +392,15 @@ function PostCodeAutocomplete(config) {
             acCall.then( function($data) {
                 $self.predictions = $data.result.predictions;
                 $self.validate();
+                if ($data.cmd && $data.cmd.use_tid) {
+                    $self.config.tid = $data.cmd.use_tid;
+
+                    if (0 < $self.config.serviceGroup.length) {
+                        $self.config.serviceGroup.forEach( function(serviceObject) {
+                            serviceObject.updateConfig({'tid': $data.cmd.use_tid});
+                        })
+                    }
+                }
             }, function($data){console.log('Rejected with data:', $data)});
         });
 
