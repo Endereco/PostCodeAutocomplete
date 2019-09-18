@@ -30,6 +30,7 @@ function PostCodeAutocomplete(config) {
     }
     this.defaultConfig = {
         'useWatcher': true,
+        'referer': 'not_set',
         'tid': 'not_set'
     };
     this.fieldsAreSet = false;
