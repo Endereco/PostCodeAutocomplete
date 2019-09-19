@@ -1,6 +1,6 @@
 {
   "name": "@endereco/postcodeautocomplete",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "",
   "main": "PostCodeAutocomplete.js",
   "scripts": {
