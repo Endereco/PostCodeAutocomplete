@@ -419,7 +419,7 @@ function PostCodeAutocomplete(config) {
         // Register blur event
         $self.inputElement.addEventListener('blur', function() {
             $self.removeDropdown();
-            $self.restoreOriginal();
+            $self.saveOriginal();
             $self.validate();
         });
 
